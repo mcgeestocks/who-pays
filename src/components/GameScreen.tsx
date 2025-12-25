@@ -1,6 +1,6 @@
 import type { JSX } from "preact";
-import { GameStageCanvas } from "../canvas/GameStageCanvas";
-import type { GamePhase } from "../canvas/gameRenderer/GameRendererOptions";
+import type { GamePhase } from "../app/canvas/gameRenderer/GameRendererOptions";
+import { GameStageCanvas } from "./GameStageCanvas";
 
 type GameScreenProps = {
   phase: GamePhase | "RESULT";

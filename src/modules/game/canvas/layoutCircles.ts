@@ -1,4 +1,13 @@
-import type { Circle } from "./types/Circle";
+type CircleState = "idle" | "held" | "locked";
+
+type Circle = {
+  id: number;
+  x: number;
+  y: number;
+  radius: number;
+  state: CircleState;
+  holdProgress: number; // 0-1, progress toward lock
+};
 
 type LayoutOptions = {
   width: number;

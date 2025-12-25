@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useState } from "preact/hooks";
-import { usePwaUpdate } from "../libs/progressiveWebApp/usePwaUpdate";
-import { UpdateNotice } from "../modules/UpdateNotice";
-import type { GamePhase } from "./canvas/gameRenderer/GameRendererOptions";
-import { GameScreen } from "./screens/GameScreen";
-import { Home } from "./screens/Home";
+import { GameScreen } from "../components/GameScreen";
+import { Home } from "../components/Home";
+import { UpdateNotice } from "../components/UpdateNotice";
+import type { GamePhase } from "../modules/game/canvas/types";
+import { usePwaUpdate } from "../modules/progressiveWebApp/usePwaUpdate";
 
 type AppState = "HOME" | "DEVICE_CHECK" | "GAME" | "GAME_RESULT";
 

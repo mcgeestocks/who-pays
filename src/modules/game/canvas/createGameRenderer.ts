@@ -1,8 +1,12 @@
-import { pickWinnerIndex } from "../../game/pickWinnerIndex";
-import { buildSuspenseSchedule } from "../../game/suspense/buildSuspenseSchedule";
-import type { JumpStep } from "../../game/suspense/JumpStep";
-import type { GameRendererHandle } from "./GameRendererHandle";
-import type { GamePhase, GameRendererOptions } from "./GameRendererOptions";
+import { COLORS } from "../../../components/styles/colors";
+import { pickWinnerIndex } from "../../utils/pickWinnerIndex";
+import { buildSuspenseSchedule } from "../suspense/buildSuspenseSchedule";
+import type { JumpStep } from "../suspense/JumpStep";
+import type {
+  GamePhase,
+  GameRendererHandle,
+  GameRendererOptions,
+} from "./types";
 
 const DEFAULT_COUNTDOWN_MS = 5000;
 const DEFAULT_MIN_PLAYERS = 2;
@@ -10,21 +14,6 @@ const DEFAULT_MIN_PLAYERS = 2;
 const TOUCH_CIRCLE_SCALE = 0.12;
 const ACTIVE_RING_OFFSET = 8;
 const HIGHLIGHT_RING_OFFSET = 12;
-
-const COLORS = [
-  "#f97316",
-  "#f59e0b",
-  "#22c55e",
-  "#38bdf8",
-  "#6366f1",
-  "#ec4899",
-  "#f97316",
-  "#0ea5e9",
-  "#84cc16",
-  "#eab308",
-  "#f43f5e",
-  "#14b8a6",
-];
 
 type TouchState = {
   x: number;

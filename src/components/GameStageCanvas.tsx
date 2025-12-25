@@ -1,8 +1,10 @@
 import type { JSX } from "preact";
 import { useEffect, useRef } from "preact/hooks";
-import { createGameRenderer } from "./gameRenderer/createGameRenderer";
-import type { GameRendererHandle } from "./gameRenderer/GameRendererHandle";
-import type { GamePhase } from "./gameRenderer/GameRendererOptions";
+import { createGameRenderer } from "../modules/game/canvas/createGameRenderer";
+import type {
+  GamePhase,
+  GameRendererHandle,
+} from "../modules/game/canvas/types";
 
 type GameStageCanvasProps = {
   onPhaseChange: (phase: GamePhase) => void;
