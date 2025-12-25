@@ -23,9 +23,6 @@ export function Home({ onStart }: HomeProps): JSX.Element {
           Start Game
         </button>
       </div>
-      <div class="rounded-2xl border border-slate-200 p-4 text-sm text-slate-600">
-        Settings toggles land here.
-      </div>
     </section>
   );
 }

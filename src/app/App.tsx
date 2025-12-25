@@ -1,12 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
+import { useCallback, useMemo, useState } from "preact/hooks";
+import { usePwaUpdate } from "../libs/progressiveWebApp/usePwaUpdate";
+import { UpdateNotice } from "../modules/UpdateNotice";
 import type { GamePhase } from "./canvas/gameRenderer/GameRendererOptions";
-import { addWinHistoryEntry } from "./game/winHistory/addWinHistoryEntry";
-import { loadWinHistory } from "./game/winHistory/loadWinHistory";
-import { usePwaUpdate } from "./pwa/usePwaUpdate";
 import { GameScreen } from "./screens/GameScreen";
 import { Home } from "./screens/Home";
-import type { AppState } from "./stateMachine/AppState";
-import { UpdateNotice } from "./ui/UpdateNotice";
+
+type AppState = "HOME" | "DEVICE_CHECK" | "GAME" | "GAME_RESULT";
 
 export default function App() {
   const [state, setState] = useState<AppState>("HOME");
@@ -15,20 +14,8 @@ export default function App() {
   const [playerCount, setPlayerCount] = useState<number | null>(null);
   const [winnerIndex, setWinnerIndex] = useState<number | null>(null);
   const [resetKey, setResetKey] = useState(0);
-  const [winHistory, setWinHistory] = useState(() => loadWinHistory());
 
   const { needRefresh, updateServiceWorker, dismissUpdate } = usePwaUpdate();
-
-  useEffect(() => {
-    if (state !== "GAME_RESULT" || winnerIndex === null || playerCount === null)
-      return;
-    const next = addWinHistoryEntry({
-      winnerIndex,
-      playerCount,
-      timestamp: Date.now(),
-    });
-    setWinHistory(next);
-  }, [playerCount, state, winnerIndex]);
 
   const handlePhaseChange = useCallback((phase: GamePhase) => {
     setGamePhase(phase);
@@ -98,7 +85,6 @@ export default function App() {
             onBack={handleBack}
             onPlayAgain={handlePlayAgain}
             onSamePlayers={handlePlayAgain}
-            winHistory={winHistory}
           />
         );
       default:
@@ -111,7 +97,6 @@ export default function App() {
     playerCount,
     winnerIndex,
     resetKey,
-    winHistory,
     handlePhaseChange,
     handleCountdownTick,
     handleWinner,

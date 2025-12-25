@@ -8,7 +8,7 @@ import globals from "globals";
 
 const config: Linter.FlatConfig[] = [
   {
-    ignores: ["dist/**", "node_modules/**", "coverage/**"],
+    ignores: ["dist/**", "node_modules/**", "coverage/**", "dev-dist/**"],
   },
   js.configs.recommended,
   {
