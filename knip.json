@@ -1,0 +1,8 @@
+{
+  "entry": ["src/main.tsx"],
+  "project": [
+    "**/*.{js,jsx,ts,tsx}",
+    "!**/*.test.{ts,tsx}"
+  ],
+  "ignore": ["dist/**", "dev-dist/**", "coverage/**", "node_modules/**"]
+}

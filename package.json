@@ -14,15 +14,11 @@
     "format:check": "prettier . --check"
   },
   "dependencies": {
-    "clsx": "^2.1.1",
-    "preact": "^10.25.4",
-    "tailwind-merge": "^2.5.4"
+    "preact": "^10.25.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
-    "@preact/preset-vite": "^2.9.3",
-    "@testing-library/jest-dom": "^6.4.2",
-    "@testing-library/preact": "^3.2.4",
+    "@preact/preset-vite": "^2.9.3",    
     "@types/jest": "^29.5.12",
     "@typescript-eslint/eslint-plugin": "^8.1.0",
     "@typescript-eslint/parser": "^8.1.0",
@@ -35,8 +31,7 @@
     "jiti": "^2.6.1",
     "postcss": "^8.4.41",
     "prettier": "^3.3.3",
-    "tailwindcss": "^3.4.10",
-    "ts-jest": "^29.2.5",
+    "tailwindcss": "^3.4.10",    
     "tsx": "^4.16.2",
     "typescript": "^5.5.4",
     "vite": "^5.4.1",
