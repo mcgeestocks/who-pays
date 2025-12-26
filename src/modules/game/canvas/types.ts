@@ -1,3 +1,5 @@
+import type { JumpStep } from "../suspense/JumpStep";
+
 export type GamePhase = "COUNTDOWN" | "SUSPENSE" | "RESULT";
 
 export type GameRendererOptions = {
@@ -22,4 +24,24 @@ export type GameRendererHandle = {
   stop: () => void;
   /** Reset to countdown phase (for "same players again") */
   reset: () => void;
+};
+
+export type TouchState = {
+  x: number;
+  y: number;
+  frozen: boolean;
+};
+
+export type RendererState = {
+  phase: GamePhase;
+  touches: Map<number, TouchState>;
+  countdownStartedAt: number;
+  lastTickSecond: number;
+  suspenseStartedAt: number;
+  suspenseSchedule: JumpStep[];
+  suspenseStepIndex: number;
+  currentHighlightIndex: number;
+  winnerIndex: number;
+  playerCount: number;
+  snapshotOrder: number[]; // Maps player index to pointer ID order at snapshot
 };
