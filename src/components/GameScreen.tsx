@@ -13,6 +13,15 @@ export function GameScreen(): JSX.Element {
         <GameStageCanvas />
         <MarqueeBorderText text="TOUCH TO START" />
       </div>
+      <input
+        id="ios-haptic-switch"
+        type="checkbox"
+        class="sr-only"
+        {...({ switch: true } as JSX.IntrinsicElements["input"])}
+      />
+      <label for="ios-haptic-switch" class="sr-only">
+        Haptic
+      </label>
       {isResult && <GameCompleteModal />}
     </section>
   );
