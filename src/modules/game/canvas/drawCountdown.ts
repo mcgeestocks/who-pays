@@ -20,6 +20,12 @@ export function drawCountdown({
   touchCircleScale,
   activeRingOffset,
 }: DrawCountdownParams): void {
+  const gameFontFamily = "Badeen Display, system-ui";
+
+  const countdownTextPaddingRatio = 1.4;
+  const minimumCountdownFontSize = 16;
+  const countdownFontSearchSteps = 12;
+
   // Draw touch circles
   const touchEntries = Array.from(state.touches.entries());
   const circleRadius = Math.min(size.width, size.height) * touchCircleScale;
@@ -48,16 +54,73 @@ export function drawCountdown({
   const secondsLeft = hasCountdownStarted
     ? Math.ceil(remaining / 1000)
     : fullCountdownSeconds;
+  const countdownText = String(secondsLeft);
+  const availableWidth = size.width * countdownTextPaddingRatio;
+  const availableHeight = size.height * countdownTextPaddingRatio;
+  const countdownFontSize = getFittingFontSize({
+    ctx,
+    text: countdownText,
+    maxWidth: availableWidth,
+    maxHeight: availableHeight,
+    minimumFontSize: minimumCountdownFontSize,
+    fontFamily: gameFontFamily,
+    fontWeight: "400",
+    searchSteps: countdownFontSearchSteps,
+  });
 
   ctx.fillStyle = "#0f172a";
-  ctx.font = `bold ${Math.min(size.width, size.height) * 0.3}px system-ui, sans-serif`;
+  ctx.font = `regular ${countdownFontSize}px ${gameFontFamily}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(String(secondsLeft), size.width / 2, size.height / 2);
+  ctx.fillText(countdownText, size.width / 2, size.height / 2);
 
   // Touch count indicator
-  ctx.font = "600 16px system-ui, sans-serif";
+  ctx.font = `400 16px ${gameFontFamily}`;
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
   ctx.fillText(`${state.touches.size} players`, 16, 16);
+}
+
+type FittingFontSizeParams = {
+  ctx: CanvasRenderingContext2D;
+  text: string;
+  maxWidth: number;
+  maxHeight: number;
+  minimumFontSize: number;
+  fontFamily: string;
+  fontWeight: string;
+  searchSteps: number;
+};
+
+function getFittingFontSize({
+  ctx,
+  text,
+  maxWidth,
+  maxHeight,
+  minimumFontSize,
+  fontFamily,
+  fontWeight,
+  searchSteps,
+}: FittingFontSizeParams): number {
+  const maxDimension = Math.max(minimumFontSize, Math.min(maxWidth, maxHeight));
+  let low = minimumFontSize;
+  let high = maxDimension;
+  let bestFit = minimumFontSize;
+
+  for (let step = 0; step < searchSteps; step += 1) {
+    const mid = Math.floor((low + high) / 2);
+    ctx.font = `${fontWeight} ${mid}px ${fontFamily}`;
+    const metrics = ctx.measureText(text);
+    const textHeight =
+      metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent || mid;
+
+    if (metrics.width <= maxWidth && textHeight <= maxHeight) {
+      bestFit = mid;
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+
+  return bestFit;
 }

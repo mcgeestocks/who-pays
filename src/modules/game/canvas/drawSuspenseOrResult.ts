@@ -1,6 +1,6 @@
 import { COLORS } from "../../../components/styles/colors";
-import { withAlpha } from "./withAlpha";
 import type { RendererState } from "./types";
+import { withAlpha } from "./withAlpha";
 
 type DrawSuspenseOrResultParams = {
   ctx: CanvasRenderingContext2D;
@@ -17,6 +17,7 @@ export function drawSuspenseOrResult({
   touchCircleScale,
   highlightRingOffset,
 }: DrawSuspenseOrResultParams): void {
+  const gameFontFamily = "Modak, system-ui";
   const circleRadius = Math.min(size.width, size.height) * touchCircleScale;
   const touchEntries = Array.from(state.touches.entries());
 
@@ -61,7 +62,7 @@ export function drawSuspenseOrResult({
 
   // Status text
   ctx.fillStyle = "#0f172a";
-  ctx.font = "600 16px system-ui, sans-serif";
+  ctx.font = `400 16px ${gameFontFamily}`;
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
   const statusText =
