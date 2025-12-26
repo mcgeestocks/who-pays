@@ -1,7 +1,11 @@
-import type { JSX } from "preact";
+import type { JSX, RefCallback } from "preact";
 import { useGameSession } from "../app/gameSession/useGameSession";
 import { GameStageCanvas } from "./GameStageCanvas";
 import { MarqueeBorderText } from "./MarqueeBorderText";
+
+const setSwitchAttribute: RefCallback<HTMLInputElement> = (el) => {
+  el?.setAttribute("switch", "");
+};
 
 export function GameScreen(): JSX.Element {
   const { phase } = useGameSession();
@@ -14,10 +18,10 @@ export function GameScreen(): JSX.Element {
         <MarqueeBorderText text="TOUCH TO START" />
       </div>
       <input
+        ref={setSwitchAttribute}
         id="ios-haptic-switch"
         type="checkbox"
         class="sr-only"
-        {...({ switch: true } as JSX.IntrinsicElements["input"])}
       />
       <label for="ios-haptic-switch" class="sr-only">
         Haptic
