@@ -1,6 +1,7 @@
 import type { JSX } from "preact";
 import { useGameSession } from "../app/gameSession/useGameSession";
 import { GameStageCanvas } from "./GameStageCanvas";
+import { MarqueeBorderText } from "./MarqueeBorderText";
 
 export function GameScreen(): JSX.Element {
   const { phase } = useGameSession();
@@ -10,6 +11,7 @@ export function GameScreen(): JSX.Element {
     <section class="absolute inset-0">
       <div class="relative flex min-h-full flex-1 items-center justify-center rounded-2xl border border-slate-200 bg-white">
         <GameStageCanvas />
+        <MarqueeBorderText text="TOUCH TO START" />
       </div>
       {isResult && <GameCompleteModal />}
     </section>
