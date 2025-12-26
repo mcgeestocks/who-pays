@@ -4,6 +4,7 @@ import { Home } from "../components/Home";
 import { UpdateNotice } from "../components/UpdateNotice";
 import type { GamePhase } from "../modules/game/canvas/types";
 import { usePwaUpdate } from "../modules/progressiveWebApp/usePwaUpdate";
+import { GameSessionProvider } from "./gameSession/GameSessionProvider";
 
 type AppState = "HOME" | "DEVICE_CHECK" | "GAME" | "GAME_RESULT";
 
@@ -70,23 +71,29 @@ export default function App() {
           />
         );
       case "GAME":
-      case "GAME_RESULT":
+      case "GAME_RESULT": {
+        const phase = state === "GAME_RESULT" ? "RESULT" : gamePhase;
         return (
-          <GameScreen
-            phase={state === "GAME_RESULT" ? "RESULT" : gamePhase}
-            secondsLeft={secondsLeft}
-            playerCount={playerCount}
-            winnerIndex={winnerIndex}
-            resetKey={resetKey}
-            onPhaseChange={handlePhaseChange}
-            onCountdownTick={handleCountdownTick}
-            onWinner={handleWinner}
-            onNotEnoughPlayers={handleNotEnoughPlayers}
-            onBack={handleBack}
-            onPlayAgain={handlePlayAgain}
-            onSamePlayers={handlePlayAgain}
-          />
+          <GameSessionProvider
+            value={{
+              phase,
+              secondsLeft,
+              playerCount,
+              winnerIndex,
+              resetKey,
+              onPhaseChange: handlePhaseChange,
+              onCountdownTick: handleCountdownTick,
+              onWinner: handleWinner,
+              onNotEnoughPlayers: handleNotEnoughPlayers,
+              onBack: handleBack,
+              onPlayAgain: handlePlayAgain,
+              onSamePlayers: handlePlayAgain,
+            }}
+          >
+            <GameScreen />
+          </GameSessionProvider>
         );
+      }
       default:
         return null;
     }

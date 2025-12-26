@@ -1,26 +1,17 @@
 import type { JSX } from "preact";
 import { useEffect, useRef } from "preact/hooks";
+import { useGameSession } from "../app/gameSession/useGameSession";
 import { createGameRenderer } from "../modules/game/canvas/createGameRenderer";
-import type {
-  GamePhase,
-  GameRendererHandle,
-} from "../modules/game/canvas/types";
+import type { GameRendererHandle } from "../modules/game/canvas/types";
 
-type GameStageCanvasProps = {
-  onPhaseChange: (phase: GamePhase) => void;
-  onCountdownTick: (secondsLeft: number) => void;
-  onWinner: (winnerIndex: number, playerCount: number) => void;
-  onNotEnoughPlayers: (touchCount: number, required: number) => void;
-  resetKey?: number; // Increment to trigger reset
-};
-
-export function GameStageCanvas({
-  onPhaseChange,
-  onCountdownTick,
-  onWinner,
-  onNotEnoughPlayers,
-  resetKey,
-}: GameStageCanvasProps): JSX.Element {
+export function GameStageCanvas(): JSX.Element {
+  const {
+    onPhaseChange,
+    onCountdownTick,
+    onWinner,
+    onNotEnoughPlayers,
+    resetKey,
+  } = useGameSession();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rendererRef = useRef<GameRendererHandle | null>(null);
 
@@ -47,7 +38,7 @@ export function GameStageCanvas({
 
   // Handle reset when resetKey changes
   useEffect(() => {
-    if (resetKey !== undefined && resetKey > 0 && rendererRef.current) {
+    if (resetKey > 0 && rendererRef.current) {
       rendererRef.current.reset();
     }
   }, [resetKey]);
