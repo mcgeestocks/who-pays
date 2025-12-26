@@ -88,7 +88,7 @@ export function createGameRenderer(
 
     // Background
     context.clearRect(0, 0, size.width, size.height);
-    context.fillStyle = "#f8fafc";
+    context.fillStyle = "#000"; //TODO: Change to named export
     context.fillRect(0, 0, size.width, size.height);
 
     if (state.phase === "COUNTDOWN") {

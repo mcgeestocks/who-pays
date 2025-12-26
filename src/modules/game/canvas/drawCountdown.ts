@@ -22,30 +22,11 @@ export function drawCountdown({
 }: DrawCountdownParams): void {
   const gameFontFamily = "Badeen Display, system-ui";
 
-  const countdownTextPaddingRatio = 1.4;
+  const countdownTextPaddingRatio = 1.35;
   const minimumCountdownFontSize = 16;
   const countdownFontSearchSteps = 12;
 
-  // Draw touch circles
-  const touchEntries = Array.from(state.touches.entries());
-  const circleRadius = Math.min(size.width, size.height) * touchCircleScale;
-
-  touchEntries.forEach(([, touch], index) => {
-    const color = COLORS[index % COLORS.length];
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(touch.x, touch.y, circleRadius, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Active indicator ring
-    ctx.strokeStyle = "#0f172a";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(touch.x, touch.y, circleRadius + activeRingOffset, 0, Math.PI * 2);
-    ctx.stroke();
-  });
-
-  // Draw countdown number in center
+  // Draw countdown number first so circles render above it.
   const hasCountdownStarted = state.countdownStartedAt > 0;
   const elapsed = hasCountdownStarted
     ? performance.now() - state.countdownStartedAt
@@ -68,17 +49,36 @@ export function drawCountdown({
     searchSteps: countdownFontSearchSteps,
   });
 
+  const countdownVerticalOffset = size.height * 0.05;
+
   ctx.fillStyle = "#0f172a";
   ctx.font = `regular ${countdownFontSize}px ${gameFontFamily}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(countdownText, size.width / 2, size.height / 2);
+  ctx.fillText(
+    countdownText,
+    size.width / 2,
+    size.height / 2 - countdownVerticalOffset
+  );
 
-  // Touch count indicator
-  ctx.font = `400 16px ${gameFontFamily}`;
-  ctx.textAlign = "left";
-  ctx.textBaseline = "top";
-  ctx.fillText(`${state.touches.size} players`, 16, 16);
+  // Draw touch circles above countdown text.
+  const touchEntries = Array.from(state.touches.entries());
+  const circleRadius = Math.min(size.width, size.height) * touchCircleScale;
+
+  touchEntries.forEach(([, touch], index) => {
+    const color = COLORS[index % COLORS.length];
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(touch.x, touch.y, circleRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Active indicator ring
+    ctx.strokeStyle = "#0f172a";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(touch.x, touch.y, circleRadius + activeRingOffset, 0, Math.PI * 2);
+    ctx.stroke();
+  });
 }
 
 type FittingFontSizeParams = {
