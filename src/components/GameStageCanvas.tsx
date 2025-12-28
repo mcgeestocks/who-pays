@@ -45,7 +45,7 @@ export function GameStageCanvas(): JSX.Element {
   return (
     <canvas
       ref={canvasRef}
-      class="h-full w-full touch-none"
+      class="h-full w-full touch-none bg-black"
       width={window.innerWidth}
       height={window.innerHeight}
     />

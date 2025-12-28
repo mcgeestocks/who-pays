@@ -18,7 +18,7 @@ export function GameScreen(): JSX.Element {
     <section class="absolute inset-0">
       <div
         ref={containerRef}
-        class="relative flex min-h-full flex-1 items-center justify-center rounded-2xl border border-slate-200 bg-white"
+        class="relative flex min-h-full flex-1 items-center justify-center rounded-2xl bg-black"
       >
         <GameStageCanvas />
         <MarqueeBorderText text="TOUCH TO START" />
