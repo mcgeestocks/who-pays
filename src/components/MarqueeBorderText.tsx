@@ -172,7 +172,10 @@ function drawCharactersAlongPath(
     const charCenterDistance = currentDistance + charWidth / 2;
 
     // Only draw if the character center is within visible range
-    if (charCenterDistance >= -charWidth && charCenterDistance <= perimeter + charWidth) {
+    if (
+      charCenterDistance >= -charWidth &&
+      charCenterDistance <= perimeter + charWidth
+    ) {
       const point = getPointOnPath(
         charCenterDistance,
         width,
@@ -242,7 +245,10 @@ export function MarqueeBorderText({
       offsetRef.current += deltaSeconds * ANIMATION_SPEED_PX_PER_SECOND;
 
       // Wrap offset to prevent number growing infinitely
-      if (metricsRef.current && offsetRef.current > metricsRef.current.totalWidth * 100) {
+      if (
+        metricsRef.current &&
+        offsetRef.current > metricsRef.current.totalWidth * 100
+      ) {
         offsetRef.current = offsetRef.current % metricsRef.current.totalWidth;
       }
 

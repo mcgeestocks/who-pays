@@ -6,9 +6,7 @@ type GameCompleteModalProps = {
   containerRef: RefObject<HTMLElement>;
 };
 
-export function GameCompleteModal(
-  props: GameCompleteModalProps
-): JSX.Element {
+export function GameCompleteModal(props: GameCompleteModalProps): JSX.Element {
   const { onPlayAgain } = useGameSession();
   const { containerRef } = props;
 
