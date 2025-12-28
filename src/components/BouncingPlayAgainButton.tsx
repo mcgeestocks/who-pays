@@ -34,6 +34,7 @@ type BouncingPlayAgainButtonProps = {
 const SPEED_PX_PER_SECOND = 40;
 const FRAME_TIME_CAP_MS = 50;
 const INITIAL_OFFSET_RATIO = 0.15;
+const ROTATION_DEGREES_PER_SECOND = 18;
 
 export function BouncingPlayAgainButton(
   props: BouncingPlayAgainButtonProps
@@ -42,6 +43,7 @@ export function BouncingPlayAgainButton(
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const positionRef = useRef<Point>({ x: 0, y: 0 });
   const velocityRef = useRef<Velocity>({ x: 0, y: 0 });
+  const rotationRef = useRef<number>(0);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -55,7 +57,8 @@ export function BouncingPlayAgainButton(
       const bounds = getBounds(container, button);
       positionRef.current = createInitialPosition(bounds);
       velocityRef.current = createInitialVelocity(SPEED_PX_PER_SECOND);
-      applyTransform(button, positionRef.current);
+      rotationRef.current = 0;
+      applyTransform(button, positionRef.current, rotationRef.current);
     };
 
     initialize();
@@ -74,7 +77,12 @@ export function BouncingPlayAgainButton(
 
       positionRef.current = update.position;
       velocityRef.current = update.velocity;
-      applyTransform(button, update.position);
+      rotationRef.current = updateRotation(
+        rotationRef.current,
+        ROTATION_DEGREES_PER_SECOND,
+        deltaSeconds
+      );
+      applyTransform(button, update.position, rotationRef.current);
       rafId = requestAnimationFrame(tick);
     };
 
@@ -175,11 +183,30 @@ function resolveAxis(
   };
 }
 
-function applyTransform(button: HTMLButtonElement, position: Point): void {
-  button.style.transform = `translate(${position.x}px, ${position.y}px)`;
+function applyTransform(
+  button: HTMLButtonElement,
+  position: Point,
+  rotationDegrees: number
+): void {
+  button.style.transform = `translate(${position.x}px, ${position.y}px) rotate(${rotationDegrees}deg)`;
 }
 
 function getDeltaSeconds(now: number, lastTimestamp: number): number {
   const deltaMs = Math.min(now - lastTimestamp, FRAME_TIME_CAP_MS);
   return deltaMs / 1000;
+}
+
+function updateRotation(
+  rotationDegrees: number,
+  rotationSpeedDegreesPerSecond: number,
+  deltaSeconds: number
+): number {
+  const nextRotation =
+    rotationDegrees + rotationSpeedDegreesPerSecond * deltaSeconds;
+
+  if (nextRotation < 360) {
+    return nextRotation;
+  }
+
+  return nextRotation % 360;
 }

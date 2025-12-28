@@ -36,7 +36,6 @@ export function GameStageCanvas(): JSX.Element {
     };
   }, [onPhaseChange, onCountdownTick, onWinner, onNotEnoughPlayers]);
 
-  // Handle reset when resetKey changes
   useEffect(() => {
     if (resetKey > 0 && rendererRef.current) {
       rendererRef.current.reset();
