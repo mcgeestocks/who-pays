@@ -1,5 +1,6 @@
 import type { JSX } from "preact";
 import { useEffect, useRef } from "preact/hooks";
+import type { OrientedPoint } from "../modules/geometryTypes";
 
 const DEFAULT_TEXT = "TOUCH TO START";
 const TEXT_SEPARATOR = " • ";
@@ -12,12 +13,6 @@ const FONT_FAMILY = "system-ui, -apple-system, sans-serif";
 
 type MarqueeBorderTextProps = {
   text?: string;
-};
-
-type PathPoint = {
-  x: number;
-  y: number;
-  angle: number;
 };
 
 type PathGeometry = {
@@ -53,7 +48,7 @@ function getPointOnPath(
   height: number,
   inset: number,
   geometry: PathGeometry
-): PathPoint {
+): OrientedPoint {
   const { topLength, rightLength, bottomLength, perimeter } = geometry;
 
   // Wrap distance to stay within perimeter

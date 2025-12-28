@@ -1,10 +1,6 @@
 import type { JSX, RefObject } from "preact";
 import { useEffect, useRef } from "preact/hooks";
-
-type Point = {
-  x: number;
-  y: number;
-};
+import type { Point } from "../modules/geometryTypes";
 
 type Velocity = {
   x: number;

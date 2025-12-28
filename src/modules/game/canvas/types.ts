@@ -1,3 +1,4 @@
+import type { TouchPoint } from "../../geometryTypes";
 import type { JumpStep } from "../suspense/JumpStep";
 
 export type GamePhase = "COUNTDOWN" | "SUSPENSE" | "RESULT";
@@ -26,15 +27,9 @@ export type GameRendererHandle = {
   reset: () => void;
 };
 
-export type TouchState = {
-  x: number;
-  y: number;
-  frozen: boolean;
-};
-
 export type RendererState = {
   phase: GamePhase;
-  touches: Map<number, TouchState>;
+  touches: Map<number, TouchPoint>;
   countdownStartedAt: number;
   lastTickSecond: number;
   suspenseStartedAt: number;

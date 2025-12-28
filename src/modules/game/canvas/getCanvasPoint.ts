@@ -1,12 +1,9 @@
-type CanvasPoint = {
-  x: number;
-  y: number;
-};
+import type { Point } from "../../geometryTypes";
 
 export function getCanvasPoint(
   canvas: HTMLCanvasElement,
   event: PointerEvent
-): CanvasPoint {
+): Point {
   const rect = canvas.getBoundingClientRect();
   return {
     x: event.clientX - rect.left,
