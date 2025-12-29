@@ -12,3 +12,18 @@ export const COLORS = [
   "#f43f5e",
   "#14b8a6",
 ];
+
+export const COLOR_NAMES = [
+  "Orange",
+  "Amber",
+  "Green",
+  "Sky",
+  "Indigo",
+  "Pink",
+  "Orange",
+  "Sky",
+  "Lime",
+  "Yellow",
+  "Rose",
+  "Teal",
+];

@@ -27,7 +27,7 @@ export function createGameRenderer(
   const minPlayers = options.minPlayers ?? DEFAULT_MIN_PLAYERS;
 
   const state: RendererState = {
-    phase: "COUNTDOWN",
+    phase: "WAITING_FOR_PLAYERS",
     touches: new Map(),
     countdownStartedAt: 0,
     lastTickSecond: -1,
@@ -53,13 +53,17 @@ export function createGameRenderer(
   };
 
   const update = (now: number) => {
-    if (state.phase === "COUNTDOWN") {
+    if (
+      state.phase === "WAITING_FOR_PLAYERS" ||
+      state.phase === "COUNTDOWN"
+    ) {
       const shouldTransition = updateCountdownPhase({
         now,
         state,
         countdownMs,
         minPlayers,
         fullCountdownSeconds,
+        onPhaseChange: options.onPhaseChange,
         onCountdownTick: options.onCountdownTick,
       });
       if (shouldTransition) {
@@ -91,7 +95,10 @@ export function createGameRenderer(
     context.fillStyle = "#000"; //TODO: Change to named export
     context.fillRect(0, 0, size.width, size.height);
 
-    if (state.phase === "COUNTDOWN") {
+    if (
+      state.phase === "WAITING_FOR_PLAYERS" ||
+      state.phase === "COUNTDOWN"
+    ) {
       drawCountdown({
         ctx: context,
         size,
@@ -114,7 +121,7 @@ export function createGameRenderer(
 
   // Pointer event handlers
   const handlePointerDown = (event: PointerEvent) => {
-    if (state.phase !== "COUNTDOWN") return;
+    if (state.phase === "SUSPENSE" || state.phase === "RESULT") return;
 
     const point = getCanvasPoint(canvas, event);
     state.touches.set(event.pointerId, {
@@ -135,7 +142,10 @@ export function createGameRenderer(
   };
 
   const handlePointerUp = (event: PointerEvent) => {
-    if (state.phase === "COUNTDOWN") {
+    if (
+      state.phase === "WAITING_FOR_PLAYERS" ||
+      state.phase === "COUNTDOWN"
+    ) {
       // During countdown, remove the touch entirely
       state.touches.delete(event.pointerId);
     } else if (state.phase === "SUSPENSE") {
@@ -158,7 +168,7 @@ export function createGameRenderer(
   };
 
   const reset = () => {
-    state.phase = "COUNTDOWN";
+    state.phase = "WAITING_FOR_PLAYERS";
     state.touches.clear();
     state.countdownStartedAt = 0;
     state.lastTickSecond = -1;
@@ -169,7 +179,7 @@ export function createGameRenderer(
     state.winnerIndex = 0;
     state.playerCount = 0;
     state.snapshotOrder = [];
-    options.onPhaseChange("COUNTDOWN");
+    options.onPhaseChange("WAITING_FOR_PLAYERS");
   };
 
   return {
@@ -198,7 +208,7 @@ export function createGameRenderer(
       state.countdownStartedAt = 0;
       state.lastTickSecond = -1;
       options.onCountdownTick(fullCountdownSeconds);
-      options.onPhaseChange("COUNTDOWN");
+      options.onPhaseChange("WAITING_FOR_PLAYERS");
       rafId = requestAnimationFrame(loop);
     },
     stop: () => {

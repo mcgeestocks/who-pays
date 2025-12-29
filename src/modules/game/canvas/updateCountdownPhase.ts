@@ -6,6 +6,7 @@ type UpdateCountdownPhaseParams = {
   countdownMs: number;
   minPlayers: number;
   fullCountdownSeconds: number;
+  onPhaseChange: GameRendererOptions["onPhaseChange"];
   onCountdownTick: GameRendererOptions["onCountdownTick"];
 };
 
@@ -15,11 +16,20 @@ export function updateCountdownPhase({
   countdownMs,
   minPlayers,
   fullCountdownSeconds,
+  onPhaseChange,
   onCountdownTick,
 }: UpdateCountdownPhaseParams): boolean {
   const touchCount = state.touches.size;
   if (touchCount < minPlayers) {
-    if (state.countdownStartedAt) {
+    const shouldResetCountdown =
+      state.phase !== "WAITING_FOR_PLAYERS" ||
+      state.countdownStartedAt > 0 ||
+      state.lastTickSecond !== -1;
+    if (state.phase !== "WAITING_FOR_PLAYERS") {
+      state.phase = "WAITING_FOR_PLAYERS";
+      onPhaseChange("WAITING_FOR_PLAYERS");
+    }
+    if (shouldResetCountdown) {
       state.countdownStartedAt = 0;
       state.lastTickSecond = -1;
       onCountdownTick(fullCountdownSeconds);
@@ -27,8 +37,14 @@ export function updateCountdownPhase({
     return false;
   }
 
-  if (!state.countdownStartedAt) {
+  if (state.phase === "WAITING_FOR_PLAYERS") {
+    state.phase = "COUNTDOWN";
+    onPhaseChange("COUNTDOWN");
     state.countdownStartedAt = now;
+    state.lastTickSecond = -1;
+  } else if (state.countdownStartedAt === 0) {
+    state.countdownStartedAt = now;
+    state.lastTickSecond = -1;
   }
 
   const elapsed = now - state.countdownStartedAt;

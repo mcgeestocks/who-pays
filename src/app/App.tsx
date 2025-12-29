@@ -10,7 +10,8 @@ type AppState = "HOME" | "DEVICE_CHECK" | "GAME" | "GAME_RESULT";
 
 export default function App() {
   const [state, setState] = useState<AppState>("HOME");
-  const [gamePhase, setGamePhase] = useState<GamePhase>("COUNTDOWN");
+  const [gamePhase, setGamePhase] =
+    useState<GamePhase>("WAITING_FOR_PLAYERS");
   const [secondsLeft, setSecondsLeft] = useState(5);
   const [playerCount, setPlayerCount] = useState<number | null>(null);
   const [winnerIndex, setWinnerIndex] = useState<number | null>(null);
@@ -45,7 +46,7 @@ export default function App() {
   const handlePlayAgain = useCallback(() => {
     setWinnerIndex(null);
     setPlayerCount(null);
-    setGamePhase("COUNTDOWN");
+    setGamePhase("WAITING_FOR_PLAYERS");
     setSecondsLeft(5);
     setResetKey((key) => key + 1);
     setState("GAME");
@@ -54,7 +55,7 @@ export default function App() {
   const handleBack = useCallback(() => {
     setWinnerIndex(null);
     setPlayerCount(null);
-    setGamePhase("COUNTDOWN");
+    setGamePhase("WAITING_FOR_PLAYERS");
     setSecondsLeft(5);
     setState("HOME");
   }, []);

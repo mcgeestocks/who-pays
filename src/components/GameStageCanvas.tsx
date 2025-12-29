@@ -34,7 +34,12 @@ export function GameStageCanvas(): JSX.Element {
       renderer.stop();
       rendererRef.current = null;
     };
-  }, [onPhaseChange, onCountdownTick, onWinner, onNotEnoughPlayers]);
+  }, [
+    onPhaseChange,
+    onCountdownTick,
+    onWinner,
+    onNotEnoughPlayers,
+  ]);
 
   useEffect(() => {
     if (resetKey > 0 && rendererRef.current) {

@@ -10,6 +10,7 @@ const PATH_INSET = FONT_SIZE + 4;
 const TEXT_COLOR = "#94a3b8";
 const ANIMATION_SPEED_PX_PER_SECOND = 30;
 const FONT_FAMILY = "system-ui, -apple-system, sans-serif";
+const FADE_DURATION_MS = 600;
 
 type MarqueeBorderTextProps = {
   text?: string;
@@ -26,6 +27,12 @@ type PathGeometry = {
 type CharacterMetrics = {
   charWidths: Map<string, number>;
   totalWidth: number;
+};
+
+type TextTransitionState = {
+  activeText: string;
+  pendingText: string | null;
+  fadeStartTime: number | null;
 };
 
 function calculatePathGeometry(
@@ -51,10 +58,8 @@ function getPointOnPath(
 ): OrientedPoint {
   const { topLength, rightLength, bottomLength, perimeter } = geometry;
 
-  // Wrap distance to stay within perimeter
   const wrappedDistance = ((distance % perimeter) + perimeter) % perimeter;
 
-  // Top edge: left to right (angle = 0)
   if (wrappedDistance < topLength) {
     return {
       x: inset + wrappedDistance,
@@ -63,7 +68,6 @@ function getPointOnPath(
     };
   }
 
-  // Right edge: top to bottom (angle = 90°)
   const afterTop = wrappedDistance - topLength;
   if (afterTop < rightLength) {
     return {
@@ -73,7 +77,6 @@ function getPointOnPath(
     };
   }
 
-  // Bottom edge: right to left (angle = 180°)
   const afterRight = afterTop - rightLength;
   if (afterRight < bottomLength) {
     return {
@@ -83,7 +86,6 @@ function getPointOnPath(
     };
   }
 
-  // Left edge: bottom to top (angle = 270°)
   const afterBottom = afterRight - bottomLength;
   return {
     x: inset,
@@ -131,42 +133,51 @@ function measureCharacterWidths(
   return { charWidths, totalWidth };
 }
 
-function drawCharactersAlongPath(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  metrics: CharacterMetrics,
-  offset: number,
-  width: number,
-  height: number,
-  inset: number,
-  geometry: PathGeometry
-): void {
+function getBaseText(text: string): string {
+  return `${text}${TEXT_SEPARATOR}`;
+}
+
+function drawCharactersAlongPath({
+  ctx,
+  text,
+  metrics,
+  offset,
+  width,
+  height,
+  inset,
+  geometry,
+  opacity,
+}: {
+  ctx: CanvasRenderingContext2D;
+  text: string;
+  metrics: CharacterMetrics;
+  offset: number;
+  width: number;
+  height: number;
+  inset: number;
+  geometry: PathGeometry;
+  opacity: number;
+}): void {
   const { perimeter } = geometry;
   const { charWidths, totalWidth } = metrics;
 
-  ctx.clearRect(0, 0, width, height);
+  ctx.save();
+  ctx.globalAlpha = opacity;
   ctx.font = `${FONT_SIZE}px ${FONT_FAMILY}`;
   ctx.letterSpacing = `${LETTER_SPACING}px`;
   ctx.fillStyle = TEXT_COLOR;
   ctx.textBaseline = "middle";
   ctx.textAlign = "center";
 
-  // Start position based on current offset (negative to create forward motion)
   const startOffset = -(offset % totalWidth);
-
-  // Draw characters one by one along the entire perimeter
   let currentDistance = startOffset;
   let charIndex = 0;
 
-  // Continue drawing until we've covered the entire perimeter plus some buffer
   while (currentDistance < perimeter + totalWidth) {
     const char = text[charIndex % text.length];
     const charWidth = charWidths.get(char) ?? 0;
-
-    // Position character at center of its space
     const charCenterDistance = currentDistance + charWidth / 2;
 
-    // Only draw if the character center is within visible range
     if (
       charCenterDistance >= -charWidth &&
       charCenterDistance <= perimeter + charWidth
@@ -189,6 +200,13 @@ function drawCharactersAlongPath(
     currentDistance += charWidth;
     charIndex++;
   }
+
+  ctx.restore();
+}
+
+function getFadeProgress(fadeStartTime: number, currentTime: number): number {
+  const elapsed = currentTime - fadeStartTime;
+  return Math.min(1, Math.max(0, elapsed / FADE_DURATION_MS));
 }
 
 export function MarqueeBorderText({
@@ -199,8 +217,24 @@ export function MarqueeBorderText({
   const animationRef = useRef<number>(0);
   const offsetRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
-  const metricsRef = useRef<CharacterMetrics | null>(null);
+  const transitionRef = useRef<TextTransitionState>({
+    activeText: text,
+    pendingText: null,
+    fadeStartTime: null,
+  });
   const geometryRef = useRef<PathGeometry | null>(null);
+  const metricsRef = useRef<{
+    active: CharacterMetrics | null;
+    pending: CharacterMetrics | null;
+  }>({
+    active: null,
+    pending: null,
+  });
+  const requestedTextRef = useRef<string>(text);
+
+  useEffect(() => {
+    requestedTextRef.current = text;
+  }, [text]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -211,7 +245,17 @@ export function MarqueeBorderText({
     let height = 0;
     let ctx: CanvasRenderingContext2D | null = null;
 
-    const baseText = `${text}${TEXT_SEPARATOR}`;
+    const updateMetrics = (): void => {
+      if (!ctx) return;
+      const { activeText, pendingText } = transitionRef.current;
+      metricsRef.current.active = measureCharacterWidths(
+        ctx,
+        getBaseText(activeText)
+      );
+      metricsRef.current.pending = pendingText
+        ? measureCharacterWidths(ctx, getBaseText(pendingText))
+        : null;
+    };
 
     const updateSize = (): void => {
       const rect = container.getBoundingClientRect();
@@ -224,9 +268,7 @@ export function MarqueeBorderText({
       if (!ctx) return;
 
       geometryRef.current = calculatePathGeometry(width, height, PATH_INSET);
-
-      // Measure character widths
-      metricsRef.current = measureCharacterWidths(ctx, baseText);
+      updateMetrics();
     };
 
     const tick = (currentTime: number): void => {
@@ -239,25 +281,75 @@ export function MarqueeBorderText({
 
       offsetRef.current += deltaSeconds * ANIMATION_SPEED_PX_PER_SECOND;
 
-      // Wrap offset to prevent number growing infinitely
-      if (
-        metricsRef.current &&
-        offsetRef.current > metricsRef.current.totalWidth * 100
-      ) {
-        offsetRef.current = offsetRef.current % metricsRef.current.totalWidth;
+      const { activeText, pendingText, fadeStartTime } = transitionRef.current;
+
+      const requestedText = requestedTextRef.current;
+      if (requestedText !== activeText && requestedText !== pendingText) {
+        transitionRef.current.pendingText = requestedText;
+        transitionRef.current.fadeStartTime = currentTime;
+        if (ctx) {
+          metricsRef.current.pending = measureCharacterWidths(
+            ctx,
+            getBaseText(requestedText)
+          );
+        }
       }
 
-      if (ctx && geometryRef.current && metricsRef.current) {
-        drawCharactersAlongPath(
-          ctx,
-          baseText,
-          metricsRef.current,
-          offsetRef.current,
-          width,
-          height,
-          PATH_INSET,
-          geometryRef.current
-        );
+      const activeMetrics = metricsRef.current.active;
+      const pendingMetrics = metricsRef.current.pending;
+
+      if (ctx && geometryRef.current && activeMetrics) {
+        ctx.clearRect(0, 0, width, height);
+
+        if (pendingText && pendingMetrics && fadeStartTime !== null) {
+          const progress = getFadeProgress(fadeStartTime, currentTime);
+          const activeOpacity = 1 - progress;
+          const pendingOpacity = progress;
+
+          drawCharactersAlongPath({
+            ctx,
+            text: getBaseText(activeText),
+            metrics: activeMetrics,
+            offset: offsetRef.current,
+            width,
+            height,
+            inset: PATH_INSET,
+            geometry: geometryRef.current,
+            opacity: activeOpacity,
+          });
+
+          drawCharactersAlongPath({
+            ctx,
+            text: getBaseText(pendingText),
+            metrics: pendingMetrics,
+            offset: offsetRef.current,
+            width,
+            height,
+            inset: PATH_INSET,
+            geometry: geometryRef.current,
+            opacity: pendingOpacity,
+          });
+
+          if (progress >= 1) {
+            transitionRef.current.activeText = pendingText;
+            transitionRef.current.pendingText = null;
+            transitionRef.current.fadeStartTime = null;
+            metricsRef.current.active = pendingMetrics;
+            metricsRef.current.pending = null;
+          }
+        } else {
+          drawCharactersAlongPath({
+            ctx,
+            text: getBaseText(activeText),
+            metrics: activeMetrics,
+            offset: offsetRef.current,
+            width,
+            height,
+            inset: PATH_INSET,
+            geometry: geometryRef.current,
+            opacity: 1,
+          });
+        }
       }
 
       animationRef.current = requestAnimationFrame(tick);
@@ -270,14 +362,13 @@ export function MarqueeBorderText({
     });
     observer.observe(container);
 
-    // Start animation
     animationRef.current = requestAnimationFrame(tick);
 
     return () => {
       observer.disconnect();
       cancelAnimationFrame(animationRef.current);
     };
-  }, [text]);
+  }, []);
 
   return (
     <div

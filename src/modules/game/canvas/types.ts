@@ -1,7 +1,11 @@
 import type { TouchPoint } from "../../geometryTypes";
 import type { JumpStep } from "../suspense/JumpStep";
 
-export type GamePhase = "COUNTDOWN" | "SUSPENSE" | "RESULT";
+export type GamePhase =
+  | "WAITING_FOR_PLAYERS"
+  | "COUNTDOWN"
+  | "SUSPENSE"
+  | "RESULT";
 
 export type GameRendererOptions = {
   /** Countdown duration in milliseconds. Default: 5000 */
