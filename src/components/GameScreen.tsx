@@ -1,4 +1,4 @@
-import type { JSX, RefCallback } from "preact";
+import type { JSX } from "preact";
 import { useRef } from "preact/hooks";
 import { useGameSession } from "../app/gameSession/useGameSession";
 import type { GamePhase } from "../modules/game/canvas/types";
@@ -6,10 +6,6 @@ import { GameCompleteModal } from "./GameCompleteModal";
 import { GameStageCanvas } from "./GameStageCanvas";
 import { MarqueeBorderText } from "./MarqueeBorderText";
 import { COLOR_NAMES } from "./styles/colors";
-
-const setSwitchAttribute: RefCallback<HTMLInputElement> = (el) => {
-  el?.setAttribute("switch", "");
-};
 
 const MARQUEE_TEXT_BY_PHASE: Record<Exclude<GamePhase, "RESULT">, string> = {
   WAITING_FOR_PLAYERS: "TOUCH AND HOLD • UP TO 5 PLAYERS",
@@ -61,15 +57,6 @@ export function GameScreen(): JSX.Element {
         <MarqueeBorderText text={marqueeText} />
         {isResult && <GameCompleteModal containerRef={containerRef} />}
       </div>
-      <input
-        ref={setSwitchAttribute}
-        id="ios-haptic-switch"
-        type="checkbox"
-        class="sr-only"
-      />
-      <label for="ios-haptic-switch" class="sr-only">
-        Haptic
-      </label>
     </section>
   );
 }

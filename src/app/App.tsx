@@ -1,17 +1,12 @@
 import { useCallback, useMemo, useState } from "preact/hooks";
 import { GameScreen } from "../components/GameScreen";
-import { Home } from "../components/Home";
 import { UpdateNotice } from "../components/UpdateNotice";
 import type { GamePhase } from "../modules/game/canvas/types";
 import { usePwaUpdate } from "../modules/progressiveWebApp/usePwaUpdate";
 import { GameSessionProvider } from "./gameSession/GameSessionProvider";
 
-type AppState = "HOME" | "DEVICE_CHECK" | "GAME" | "GAME_RESULT";
-
 export default function App() {
-  const [state, setState] = useState<AppState>("HOME");
-  const [gamePhase, setGamePhase] =
-    useState<GamePhase>("WAITING_FOR_PLAYERS");
+  const [gamePhase, setGamePhase] = useState<GamePhase>("WAITING_FOR_PLAYERS");
   const [secondsLeft, setSecondsLeft] = useState(5);
   const [playerCount, setPlayerCount] = useState<number | null>(null);
   const [winnerIndex, setWinnerIndex] = useState<number | null>(null);
@@ -21,9 +16,6 @@ export default function App() {
 
   const handlePhaseChange = useCallback((phase: GamePhase) => {
     setGamePhase(phase);
-    if (phase === "RESULT") {
-      setState("GAME_RESULT");
-    }
   }, []);
 
   const handleCountdownTick = useCallback((seconds: number) => {
@@ -49,80 +41,51 @@ export default function App() {
     setGamePhase("WAITING_FOR_PLAYERS");
     setSecondsLeft(5);
     setResetKey((key) => key + 1);
-    setState("GAME");
   }, []);
 
-  const handleBack = useCallback(() => {
-    setWinnerIndex(null);
-    setPlayerCount(null);
-    setGamePhase("WAITING_FOR_PLAYERS");
-    setSecondsLeft(5);
-    setState("HOME");
-  }, []);
-
-  const screen = useMemo(() => {
-    switch (state) {
-      case "HOME":
-        return (
-          <Home
-            onStart={() => {
-              setResetKey((key) => key + 1);
-              setState("GAME");
-            }}
-          />
-        );
-      case "GAME":
-      case "GAME_RESULT": {
-        const phase = state === "GAME_RESULT" ? "RESULT" : gamePhase;
-        return (
-          <GameSessionProvider
-            value={{
-              phase,
-              secondsLeft,
-              playerCount,
-              winnerIndex,
-              resetKey,
-              onPhaseChange: handlePhaseChange,
-              onCountdownTick: handleCountdownTick,
-              onWinner: handleWinner,
-              onNotEnoughPlayers: handleNotEnoughPlayers,
-              onBack: handleBack,
-              onPlayAgain: handlePlayAgain,
-              onSamePlayers: handlePlayAgain,
-            }}
-          >
-            <GameScreen />
-          </GameSessionProvider>
-        );
-      }
-      default:
-        return null;
-    }
-  }, [
-    state,
-    gamePhase,
-    secondsLeft,
-    playerCount,
-    winnerIndex,
-    resetKey,
-    handlePhaseChange,
-    handleCountdownTick,
-    handleWinner,
-    handleNotEnoughPlayers,
-    handleBack,
-    handlePlayAgain,
-  ]);
+  const sessionValue = useMemo(
+    () => ({
+      phase: gamePhase,
+      secondsLeft,
+      playerCount,
+      winnerIndex,
+      resetKey,
+      onPhaseChange: handlePhaseChange,
+      onCountdownTick: handleCountdownTick,
+      onWinner: handleWinner,
+      onNotEnoughPlayers: handleNotEnoughPlayers,
+      onPlayAgain: handlePlayAgain,
+    }),
+    [
+      gamePhase,
+      secondsLeft,
+      playerCount,
+      winnerIndex,
+      resetKey,
+      handlePhaseChange,
+      handleCountdownTick,
+      handleWinner,
+      handleNotEnoughPlayers,
+      handlePlayAgain,
+    ]
+  );
 
   return (
     <div class="min-h-full bg-amber-50 text-slate-900">
       <div class="mx-auto p-6">
         {needRefresh ? (
-          <UpdateNotice
-            onRefresh={updateServiceWorker}
-            onDismiss={dismissUpdate}
-          />
+          <div class="fixed left-6 right-6 top-6 z-20">
+            <UpdateNotice
+              onRefresh={updateServiceWorker}
+              onDismiss={dismissUpdate}
+            />
+          </div>
         ) : null}
-        <main>{screen}</main>
+        <main>
+          <GameSessionProvider value={sessionValue}>
+            <GameScreen />
+          </GameSessionProvider>
+        </main>
       </div>
     </div>
   );
