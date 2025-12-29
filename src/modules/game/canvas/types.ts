@@ -31,6 +31,23 @@ export type GameRendererHandle = {
   reset: () => void;
 };
 
+export type CashConfettiLayer = "front" | "back";
+
+export type CashConfettiParticle = {
+  x: number;
+  y: number;
+  velocityX: number;
+  velocityY: number;
+  gravity: number;
+  drag: number;
+  rotation: number;
+  rotationVelocity: number;
+  size: number;
+  bornAtMs: number;
+  lifetimeMs: number;
+  layer: CashConfettiLayer;
+};
+
 export type RendererState = {
   phase: GamePhase;
   touches: Map<number, TouchPoint>;
@@ -43,4 +60,8 @@ export type RendererState = {
   winnerIndex: number;
   playerCount: number;
   snapshotOrder: number[]; // Maps player index to pointer ID order at snapshot
+  cashConfettiParticles: CashConfettiParticle[];
+  cashConfettiUpdatedAtMs: number;
+  canvasWidth: number;
+  canvasHeight: number;
 };

@@ -1,4 +1,5 @@
 import { COLORS } from "../../../components/styles/colors";
+import { drawCashConfettiParticles } from "./drawCashConfettiParticles";
 import type { RendererState } from "./types";
 import { withAlpha } from "./withAlpha";
 
@@ -8,6 +9,7 @@ type DrawSuspenseOrResultParams = {
   state: RendererState;
   touchCircleScale: number;
   highlightRingOffset: number;
+  now: number;
 };
 
 export function drawSuspenseOrResult({
@@ -16,6 +18,7 @@ export function drawSuspenseOrResult({
   state,
   touchCircleScale,
   highlightRingOffset,
+  now,
 }: DrawSuspenseOrResultParams): void {
   const gameFontFamily = "system-ui";
   const circleRadius = Math.min(size.width, size.height) * touchCircleScale;
@@ -34,6 +37,13 @@ export function drawSuspenseOrResult({
     ctx.beginPath();
     ctx.arc(touch.x, touch.y, circleRadius, 0, Math.PI * 2);
     ctx.fill();
+  });
+
+  drawCashConfettiParticles({
+    ctx,
+    particles: state.cashConfettiParticles,
+    now,
+    layer: "back",
   });
 
   // Draw highlight ring on current selection
@@ -59,6 +69,13 @@ export function drawSuspenseOrResult({
     );
     ctx.stroke();
   }
+
+  drawCashConfettiParticles({
+    ctx,
+    particles: state.cashConfettiParticles,
+    now,
+    layer: "front",
+  });
 
   // Status text
   ctx.fillStyle = "#0f172a";

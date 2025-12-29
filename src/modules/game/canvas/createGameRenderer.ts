@@ -1,3 +1,5 @@
+import type { TouchPoint } from "../../geometryTypes";
+import { createCashConfettiParticles } from "./createCashConfettiParticles";
 import { drawCountdown } from "./drawCountdown";
 import { drawSuspenseOrResult } from "./drawSuspenseOrResult";
 import { getCanvasPoint } from "./getCanvasPoint";
@@ -8,6 +10,7 @@ import type {
   GameRendererOptions,
   RendererState,
 } from "./types";
+import { updateCashConfettiParticles } from "./updateCashConfettiParticles";
 import { updateCountdownPhase } from "./updateCountdownPhase";
 import { updateSuspensePhase } from "./updateSuspensePhase";
 
@@ -38,6 +41,10 @@ export function createGameRenderer(
     winnerIndex: 0,
     playerCount: 0,
     snapshotOrder: [],
+    cashConfettiParticles: [],
+    cashConfettiUpdatedAtMs: 0,
+    canvasWidth: 0,
+    canvasHeight: 0,
   };
 
   let rafId = 0;
@@ -48,15 +55,28 @@ export function createGameRenderer(
     if (!running) return;
     const now = performance.now();
     update(now);
-    draw(canvas, ctx);
+    draw(canvas, ctx, now);
     rafId = requestAnimationFrame(loop);
   };
 
+  const advanceCashConfetti = (now: number) => {
+    if (!shouldAdvanceCashConfetti(state)) {
+      state.cashConfettiUpdatedAtMs = 0;
+      return;
+    }
+
+    const updatedConfetti = updateCashConfettiParticles({
+      now,
+      particles: state.cashConfettiParticles,
+      lastUpdatedAtMs: state.cashConfettiUpdatedAtMs,
+    });
+
+    state.cashConfettiParticles = updatedConfetti.particles;
+    state.cashConfettiUpdatedAtMs = updatedConfetti.lastUpdatedAtMs;
+  };
+
   const update = (now: number) => {
-    if (
-      state.phase === "WAITING_FOR_PLAYERS" ||
-      state.phase === "COUNTDOWN"
-    ) {
+    if (state.phase === "WAITING_FOR_PLAYERS" || state.phase === "COUNTDOWN") {
       const shouldTransition = updateCountdownPhase({
         now,
         state,
@@ -79,26 +99,36 @@ export function createGameRenderer(
         state.phase = "RESULT";
         options.onPhaseChange("RESULT");
         options.onWinner(state.winnerIndex, state.playerCount);
+        const origin = getWinnerOrigin(state);
+        const circleRadius = getWinnerCircleRadius(state, TOUCH_CIRCLE_SCALE);
+        state.cashConfettiParticles = createCashConfettiParticles({
+          now,
+          origin,
+          circleRadius,
+        });
+        state.cashConfettiUpdatedAtMs = now;
       }
     }
+
+    advanceCashConfetti(now);
   };
 
   const draw = (
     target: HTMLCanvasElement,
-    context: CanvasRenderingContext2D | null
+    context: CanvasRenderingContext2D | null,
+    now: number
   ) => {
     if (!context) return;
     const size = resizeCanvas(target, context);
+    state.canvasWidth = size.width;
+    state.canvasHeight = size.height;
 
     // Background
     context.clearRect(0, 0, size.width, size.height);
     context.fillStyle = "#000"; //TODO: Change to named export
     context.fillRect(0, 0, size.width, size.height);
 
-    if (
-      state.phase === "WAITING_FOR_PLAYERS" ||
-      state.phase === "COUNTDOWN"
-    ) {
+    if (state.phase === "WAITING_FOR_PLAYERS" || state.phase === "COUNTDOWN") {
       drawCountdown({
         ctx: context,
         size,
@@ -115,6 +145,7 @@ export function createGameRenderer(
         state,
         touchCircleScale: TOUCH_CIRCLE_SCALE,
         highlightRingOffset: HIGHLIGHT_RING_OFFSET,
+        now,
       });
     }
   };
@@ -142,10 +173,7 @@ export function createGameRenderer(
   };
 
   const handlePointerUp = (event: PointerEvent) => {
-    if (
-      state.phase === "WAITING_FOR_PLAYERS" ||
-      state.phase === "COUNTDOWN"
-    ) {
+    if (state.phase === "WAITING_FOR_PLAYERS" || state.phase === "COUNTDOWN") {
       // During countdown, remove the touch entirely
       state.touches.delete(event.pointerId);
     } else if (state.phase === "SUSPENSE") {
@@ -179,6 +207,8 @@ export function createGameRenderer(
     state.winnerIndex = 0;
     state.playerCount = 0;
     state.snapshotOrder = [];
+    state.cashConfettiParticles = [];
+    state.cashConfettiUpdatedAtMs = 0;
     options.onPhaseChange("WAITING_FOR_PLAYERS");
   };
 
@@ -232,4 +262,42 @@ export function createGameRenderer(
       }
     },
   };
+}
+
+type WinnerOrigin = {
+  x: number;
+  y: number;
+};
+
+function shouldAdvanceCashConfetti(state: RendererState): boolean {
+  return state.cashConfettiParticles.length > 0;
+}
+
+function getWinnerOrigin(state: RendererState): WinnerOrigin {
+  const winnerTouch = getWinnerTouch(state);
+  if (winnerTouch) {
+    return { x: winnerTouch.x, y: winnerTouch.y };
+  }
+
+  return getFallbackOrigin(state);
+}
+
+function getWinnerTouch(state: RendererState): TouchPoint | null {
+  const winnerPointerId = state.snapshotOrder[state.winnerIndex];
+  if (winnerPointerId === undefined) return null;
+  return state.touches.get(winnerPointerId) ?? null;
+}
+
+function getFallbackOrigin(state: RendererState): WinnerOrigin {
+  const safeWidth = Math.max(1, state.canvasWidth);
+  const safeHeight = Math.max(1, state.canvasHeight);
+  return { x: safeWidth / 2, y: safeHeight / 2 };
+}
+
+function getWinnerCircleRadius(
+  state: RendererState,
+  touchCircleScale: number
+): number {
+  const canvasMinimum = Math.min(state.canvasWidth, state.canvasHeight);
+  return canvasMinimum * touchCircleScale;
 }
