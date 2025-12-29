@@ -113,12 +113,8 @@ export function drawCountdown({
     ctx.arc(touch.x, touch.y, circleRadius, 0, Math.PI * 2);
     ctx.fill();
 
-    // Active indicator ring
-    ctx.strokeStyle = "#0f172a";
-    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.arc(touch.x, touch.y, circleRadius + activeRingOffset, 0, Math.PI * 2);
-    ctx.stroke();
   });
 }
 

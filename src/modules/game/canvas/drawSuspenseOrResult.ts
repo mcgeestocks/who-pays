@@ -47,8 +47,8 @@ export function drawSuspenseOrResult({
     const isWinner =
       state.phase === "RESULT" &&
       state.currentHighlightIndex === state.winnerIndex;
-    ctx.strokeStyle = isWinner ? "#16a34a" : "#0f172a";
-    ctx.lineWidth = isWinner ? 8 : 6;
+    ctx.strokeStyle = isWinner ? "#16a34a" : "#ffffff";
+    ctx.lineWidth = isWinner ? 10 : 8;
     ctx.beginPath();
     ctx.arc(
       highlightTouch.x,
