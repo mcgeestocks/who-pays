@@ -25,8 +25,8 @@ export default defineConfig({
         start_url: "/who-pays/",
         scope: "/who-pays/",
         display: "standalone",
-        background_color: "#f7f3ef",
-        theme_color: "#f7f3ef",
+        background_color: "#000000",
+        theme_color: "#000000",
         icons: [
           {
             src: "/who-pays/icons/icon-192.svg",
