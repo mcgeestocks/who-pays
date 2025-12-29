@@ -29,7 +29,7 @@ export function drawCountdown({
   const countdownFontSearchSteps = 12;
   const countdownBasePulseScale = 0.05;
   const countdownBaseWhite = 0.65;
-  const countdownInstructionText = "Touch and hold to join";
+  const countdownInstructionText = `Who's Paying?`;
   const countdownInstructionWeight = "600";
   const countdownInstructionMinFontSize = 14;
   const countdownInstructionMaxWidthRatio = 0.8;

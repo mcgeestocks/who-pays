@@ -12,8 +12,8 @@ const setSwitchAttribute: RefCallback<HTMLInputElement> = (el) => {
 };
 
 const MARQUEE_TEXT_BY_PHASE: Record<Exclude<GamePhase, "RESULT">, string> = {
-  WAITING_FOR_PLAYERS: "TOUCH TO START",
-  COUNTDOWN: "DON'T LET GO",
+  WAITING_FOR_PLAYERS: "TOUCH AND HOLD • UP TO 5 PLAYERS",
+  COUNTDOWN: "WAITING FOR MORE • TOUCH AND HOLD TO JOIN",
   SUSPENSE: "PICKING WINNER",
 };
 const WINNER_TEXT_SUFFIX = " PLAYER WINS";
