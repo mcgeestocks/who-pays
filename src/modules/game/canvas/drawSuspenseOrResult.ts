@@ -17,7 +17,7 @@ export function drawSuspenseOrResult({
   touchCircleScale,
   highlightRingOffset,
 }: DrawSuspenseOrResultParams): void {
-  const gameFontFamily = "Modak, system-ui";
+  const gameFontFamily = "system-ui";
   const circleRadius = Math.min(size.width, size.height) * touchCircleScale;
   const touchEntries = Array.from(state.touches.entries());
 
